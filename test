@@ -1,3 +1,27 @@
-import requests
-response = requests.get("http://localhost:8080/tool/fetch_weather_data", params={"city": "London"})
-print(response.text)
+import asyncio
+import re
+import sys
+
+from mcp import ClientSession
+from mcp.client.sse import sse_client
+
+base_url = "http://localhost:8080"
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+async def main():
+    async with sse_client(f"{base_url}/sse") as (read_stream, write_stream):
+        async with ClientSession(read_stream, write_stream) as session:
+            await session.initialize()
+            result = await session.call_tool(
+                "fetch_weather_data",
+                arguments={"city": "London"},
+            )
+            for item in result.content:
+                if item.type == "text":
+                    weather = re.sub(r"\x1b\[[0-9;]*m", "", item.text)
+                    print(weather)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

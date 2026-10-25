@@ -60,17 +60,17 @@ after 10 seconds if the request does not complete.
 
 ## Testing the weather tool
 
-With the server running, the example request in `test` can be run with:
+With the server running, the MCP smoke test can be run with:
 
 ```powershell
 python test
 ```
 
-It requests weather data for London from:
-
-```text
-http://localhost:8080/tool/fetch_weather_data?city=London
-```
+The test connects to the SSE endpoint at `http://localhost:8080/sse`, performs
+the MCP handshake, calls `fetch_weather_data` for London, and prints the tool
+response without the surrounding JSON-RPC envelope or terminal color codes.
+The server does not expose a REST-style `/tool/...` endpoint; MCP clients use
+the advertised endpoint and JSON-RPC messages to call tools.
 
 ## Logging and errors
 
